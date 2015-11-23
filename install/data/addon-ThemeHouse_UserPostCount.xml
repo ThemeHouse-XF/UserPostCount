@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="ThemeHouse_UserPostCount" title="[⌂] User Post Count in Threads" version_string="1.0.0" version_id="1447261019" url="http://xf.themehouse.io" install_callback_class="ThemeHouse_Install" install_callback_method="install" uninstall_callback_class="ThemeHouse_Install" uninstall_callback_method="uninstall">
+  <admin_navigation/>
+  <admin_permissions/>
+  <admin_style_properties/>
+  <admin_templates/>
+  <admin_template_modifications/>
+  <code_events/>
+  <code_event_listeners>
+    <listener event_id="controller_pre_dispatch" execute_order="10" callback_class="ThemeHouse_Listener_ControllerPreDispatch" callback_method="controllerPreDispatch" active="1" hint="" description=""/>
+    <listener event_id="file_health_check" execute_order="10" callback_class="ThemeHouse_UserPostCount_Listener_FileHealthCheck" callback_method="fileHealthCheck" active="1" hint="" description=""/>
+    <listener event_id="init_dependencies" execute_order="10" callback_class="ThemeHouse_Listener_InitDependencies" callback_method="initDependencies" active="1" hint="" description=""/>
+    <listener event_id="load_class" execute_order="10" callback_class="ThemeHouse_UserPostCount_Listener_LoadClass" callback_method="loadClassController" active="0" hint="XenForo_ControllerPublic_Thread" description="XenForo_ControllerPublic_Thread (For XenForo 1.2 and above)" compatibility_switch="1"/>
+    <listener event_id="load_class_controller" execute_order="10" callback_class="ThemeHouse_UserPostCount_Listener_LoadClass" callback_method="loadClassController" active="1" hint="" description="(For XenForo 1.1 and below)" compatibility_switch="1"/>
+  </code_event_listeners>
+  <cron/>
+  <email_templates/>
+  <email_template_modifications/>
+  <optiongroups>
+    <group group_id="th_userPostCount" display_order="2000" debug_only="0"/>
+    <option option_id="th_userPostCount_allowInThread" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params/>
+      <sub_options/>
+      <relation group_id="th_userPostCount" display_order="10"/>
+    </option>
+  </optiongroups>
+  <permissions>
+    <permission_groups/>
+    <permissions>
+      <permission permission_group_id="forum" permission_id="thViewPostsSummary" permission_type="flag" default_value="unset" interface_group_id="forumPermissions" display_order="2000"/>
+    </permissions>
+    <interface_groups/>
+  </permissions>
+  <phrases>
+    <phrase title="option_group_th_userPostCount" version_id="1412209087" version_string="1.0.0"><![CDATA[User Post Count by ThemeHouse]]></phrase>
+    <phrase title="option_group_th_userPostCount_description" version_id="1412209087" version_string="1.0.0"><![CDATA[Options for the User Post Count by ThemeHouse add-on.]]></phrase>
+    <phrase title="option_th_userPostCount_allowInThread" version_id="1412209087" version_string="1.0.0"><![CDATA[Show List in Thread View]]></phrase>
+    <phrase title="option_th_userPostCount_allowInThread_explain" version_id="1412209087" version_string="1.0.0"><![CDATA[If ticked a full list will be shown underneath the thread title in every thread, otherwise a link will be provided.]]></phrase>
+    <phrase title="permission_forum_thViewPostsSummary" version_id="1412209087" version_string="1.0.0"><![CDATA[View User Thread Post Count]]></phrase>
+    <phrase title="th_members_who_have_posted_in_this_thread_userpostcount" version_id="1412209087" version_string="1.0.0"><![CDATA[Members who have posted in this thread]]></phrase>
+    <phrase title="th_members_who_posted_in_this_thread_userpostcount" version_id="1412209087" version_string="1.0.0"><![CDATA[Member who posted in this thread]]></phrase>
+    <phrase title="th_posts_userpostcount" version_id="1412199471" version_string="1.0.0"><![CDATA[posts]]></phrase>
+    <phrase title="th_post_userpostcount" version_id="1412199471" version_string="1.0.0"><![CDATA[post]]></phrase>
+  </phrases>
+  <route_prefixes/>
+  <style_properties/>
+  <templates>
+    <template title="th_thread_posters_userpostcount" version_id="1412209087" version_string="1.0.0"><![CDATA[<xen:title>{xen:helper threadPrefix, $thread, escaped}{$thread.title} - {xen:phrase th_members_who_have_posted_in_this_thread_userpostcount}</xen:title>
+<xen:h1>{xen:phrase th_members_who_have_posted_in_this_thread_userpostcount}</xen:h1>
+
+<xen:container var="$head.noindex">
+	<meta name="robots" content="noindex" /></xen:container>
+<xen:container var="$searchBar.thread"><xen:include template="search_bar_thread_only" /></xen:container>
+
+<xen:navigation>
+	<xen:breadcrumb source="$nodeBreadCrumbs" />
+	<xen:breadcrumb href="{xen:link full:threads, $thread}">{xen:helper threadPrefix, $thread}{$thread.title}</xen:breadcrumb>
+</xen:navigation>
+
+<div class="section">
+	<dl class="subHeading pairsInline"><dt>{xen:phrase thread}:</dt> <dd><a href="{xen:link threads, $thread}">{xen:helper threadPrefix, $thread}{$thread.title}</a></dd></dl>
+	<ol class="overlayScroll">
+	<xen:foreach loop="$records" value="$user">
+		<xen:include template="member_list_item">
+			<xen:set var="$extraTemplate"><span class="bigNumber">{xen:number {$user.post_count}}</span></xen:set>
+		</xen:include>
+	</xen:foreach>
+	</ol>
+	<div class="sectionFooter overlayOnly"><a class="button primary OverlayCloser">{xen:phrase close}</a></div>
+</div>]]></template>
+    <template title="th_thread_view_userpostcount" version_id="1412209087" version_string="1.0.0"><![CDATA[<xen:if is="{$canViewUserThreadSummary}">
+<xen:if is="{$userPostCountData}">
+	{xen:phrase th_members_who_have_posted_in_this_thread_userpostcount}:
+	<p class="muted" style="font-size:11px; margin-top:2px;">
+	<xen:foreach loop="$userPostCountData.records" value="$userCount" i="{$i}">
+		<a href="{xen:link members, $userCount}"><xen:username user="$userCount" /></a>
+		- {$userCount.post_count} 
+		<xen:if is="{$userCount.post_count} > 1">{xen:phrase th_posts_userpostcount}<xen:else />{xen:phrase th_post_userpostcount}</xen:if><xen:if is="{$i} < {$userPostCountData.limit}">, <xen:else />.</xen:if>
+	</xen:foreach>
+	</p>
+<xen:else />
+	<a href="{xen:link threads/thread-posters, $thread}" class="OverlayTrigger">{xen:phrase th_members_who_have_posted_in_this_thread_userpostcount}</a>
+</xen:if>
+</xen:if>]]></template>
+  </templates>
+  <public_template_modifications>
+    <modification template="footer" modification_key="th_copyrightNotice_userPostCount" description="Copyright notice for [⌂] User Post Count in Threads" execution_order="1" enabled="1" action="callback">
+      <find><![CDATA[/{xen:phrase (?:xenforo|extra)_copyright}/]]></find>
+      <replace><![CDATA[ThemeHouse_Listener_InitDependencies::copyrightNotice]]></replace>
+    </modification>
+    <modification template="thread_view" modification_key="th_threadView_userpostcount" description="Adds the user count list to the top of threads." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#(</xen:description>)#Us]]></find>
+      <replace><![CDATA[${0}
+<xen:include template="th_thread_view_userpostcount" />]]></replace>
+    </modification>
+  </public_template_modifications>
+  <bb_code_media_sites/>
+  <bb_codes/>
+</addon>
